@@ -1,14 +1,7 @@
 package sample;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
-import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
-import ca.uhn.fhir.model.dstu2.resource.Bundle;
-import ca.uhn.fhir.model.dstu2.resource.Patient;
-import ca.uhn.fhir.model.dstu2.valueset.AdministrativeGenderEnum;
-import ca.uhn.fhir.model.dstu2.valueset.NameUseEnum;
 import ca.uhn.fhir.parser.IParser;
-import ca.uhn.fhir.rest.client.api.IGenericClient;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -22,6 +15,10 @@ import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.Region;
 import javafx.scene.shape.Circle;
+import org.hl7.fhir.dstu3.model.Enumerations;
+import org.hl7.fhir.dstu3.model.HumanName;
+import org.hl7.fhir.dstu3.model.Identifier;
+import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,10 +26,12 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 
-public class Controller {
+public class Controller implements Observer {
 
     private double circleSize = 100.0;
     public LineChart timelineChart;
@@ -80,18 +79,23 @@ public class Controller {
     private void test() {
         System.out.println("click");
 
+        Connector connector = new Connector(Connector.GET_ALL_PATTIENT);
+        connector.addObserver(this);
+        new Thread(connector).start();
+
+
         Logger logger = LoggerFactory.getLogger(Controller.class);
         logger.info("This is how you configure Java Logging with SLF4J");
 
 
-        FhirContext fhirContext = FhirContext.forDstu2();
+        FhirContext fhirContext = FhirContext.forDstu3();
 
         // The following is an example Patient resource
         String msgString = "<Patient xmlns=\"http://hl7.org/fhir\">"
                 + "<text><status value=\"generated\" /><div xmlns=\"http://www.w3.org/1999/xhtml\">John Cardinal</div></text>"
                 + "<identifier><system value=\"http://orionhealth.com/mrn\" /><value value=\"PRP1660\" /></identifier>"
                 + "<name><use value=\"official\" /><family value=\"Cardinal\" /><given value=\"John\" /></name>"
-                + "<gender value=\"M\"></gender>"
+                + "<gender value=\"unknown\"></gender>"
                 + "<address><use value=\"home\" /><line value=\"2222 Home Street\" /></address><active value=\"true\" />"
                 + "</Patient>";
 
@@ -104,8 +108,8 @@ public class Controller {
 // The patient object has accessor methods to retrieve all of the
 // data which has been parsed into the instance.
         String patientId = patient.getIdentifier().get(0).getValue();
-        String familyName = patient.getName().get(0).getFamily().get(0).getValue();
-        String gender = patient.getGender();
+        String familyName = patient.getName().get(0).getFamily();
+        String gender = patient.getGender().getDisplay();
 
         System.out.println(patientId); // PRP1660
         System.out.println(familyName); // Cardinal
@@ -121,18 +125,18 @@ public class Controller {
         patient = new Patient();
 
 // Add an MRN (a patient identifier)
-        IdentifierDt id = patient.addIdentifier();
+        Identifier id = patient.addIdentifier();
         id.setSystem("http://example.com/fictitious-mrns");
         id.setValue("MRN001");
 
 // Add a name
-        HumanNameDt name = patient.addName();
-        name.setUse(NameUseEnum.OFFICIAL);
-        name.addFamily("Tester");
+        HumanName name = patient.addName();
+        name.setUse(HumanName.NameUse.OFFICIAL);
+        name.setFamily("Tester");
         name.addGiven("John");
         name.addGiven("Q");
 
-        patient.setGender(AdministrativeGenderEnum.MALE);
+        patient.setGender(Enumerations.AdministrativeGender.MALE);
 
 // We can now use a parser to encode this resource into a string.
         String encoded = fhirContext.newXmlParser().encodeResourceToString(patient);
@@ -141,29 +145,20 @@ public class Controller {
 
         patient = new Patient();
         patient.addIdentifier().setSystem("http://example.com/fictitious-mrns").setValue("MRN001");
-        patient.addName().setUse(NameUseEnum.OFFICIAL).addFamily("Tester").addGiven("John").addGiven("Q");
-        patient.setGender(AdministrativeGenderEnum.FEMALE);
+        patient.addName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Tester").addGiven("John").addGiven("Q");
+        patient.setGender(Enumerations.AdministrativeGender.FEMALE);
 
         encoded = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
         System.out.println(encoded);
 
         Patient p = fhirContext.newJsonParser().parseResource(Patient.class, encoded);
-        System.out.println(p.getName().get(0).getFamily().get(0).getValue());
+        System.out.println(p.getName().get(0).getFamily());
         System.out.println(p.getGender());
         System.out.println("************************");
-        // We're connecting to a DSTU1 compliant server in this example
-
-        IGenericClient client = fhirContext.newRestfulGenericClient("http://fhirtest.uhn.ca/baseDstu2");
-
-// Perform a search
-        Bundle results = client
-                .search()
-                .forResource(Patient.class)
-                .where(Patient.FAMILY.matches().value("duck"))
-                .returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
-                .execute();
-
-        System.out.println("Found " + results.getEntry().size() + " patients named 'duck'");
     }
 
+    @Override
+    public void update(Observable o, Object arg) {
+
+    }
 }
