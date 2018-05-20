@@ -3,6 +3,7 @@ package sample;
 import org.hl7.fhir.dstu3.model.*;
 import org.hl7.fhir.exceptions.FHIRException;
 import sample.datas_model.MedicalData;
+import sample.datas_model.MedicationData;
 import sample.datas_model.PatientData;
 
 import java.util.*;
@@ -18,6 +19,7 @@ public class DataProvider extends Observable implements Runnable {
     private String patientID = "";
     private LinkedList<PatientData> resultPatients;
     private LinkedList<MedicalData> resultMedicals;
+    private LinkedList<MedicationData> medicationList = new LinkedList<>();
     private String filterCondition = "";
 
 
@@ -81,14 +83,29 @@ public class DataProvider extends Observable implements Runnable {
                 try {
                     name = observation.getCode().getText();
                     startDate = observation.getIssued();
-                    measure = observation.getValueQuantity().getValue().toString() + observation.getValueQuantity().getUnit();
+                    if (observation.hasValueQuantity()) {
+                        measure = observation.getValueQuantity().getValue().toString() + observation.getValueQuantity().getUnit();
+                    } else if (observation.hasComponent()){
+                        LinkedList<String> names = new LinkedList<>();
+                        LinkedList<String> values = new LinkedList<>();
+                        for (Observation.ObservationComponentComponent component : observation.getComponent()){
+                            names.addLast(component.getCode().getText());
+                            values.addLast(component.getValueQuantity().getValue().toString()+component.getValueQuantity().getUnit());
+                        }
+                        name = String.join("/", names);
+                        measure = String.join("/",values);
+                    }
                 } catch (FHIRException e) {
                     e.printStackTrace();
                 }
                 medicals.addLast(new MedicalData("Observation", name, entryComponent.getFullUrl().split("/")[entryComponent.getFullUrl().split("/").length - 1], startDate, null, measure, entryComponent));
+                System.out.println(medicals.getLast().getHint());
+            } else if (entryComponent.getResource() instanceof Medication) {
+                Medication medication = (Medication) entryComponent.getResource();
+                medicationList.addLast(new MedicationData(medication.getCode().getCodingFirstRep().getDisplay(), medication.getCode().getCodingFirstRep().getCode(), entryComponent.getFullUrl().split("/")[entryComponent.getFullUrl().split("/").length - 1], entryComponent));
+                System.out.println(medicationList.getLast().getHint());
             } else {
-                System.out.println("**************************" + entryComponent.getResource());
-                System.out.println(entryComponent.getFullUrl());
+                System.out.println("**************************" + entryComponent.getResource()+" "+entryComponent.getFullUrl());
             }
         }
         return medicals;

@@ -14,11 +14,13 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
+<GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/8.0.121"
+          xmlns:fx="http://javafx.com/fxml/1" fx:controller="sample.Controller">
     <children>
         <AnchorPane prefHeight="800.0" prefWidth="1200.0">
             <children>
-                <TabPane layoutX="16.0" layoutY="50.0" prefHeight="441.0" prefWidth="1169.0" tabClosingPolicy="UNAVAILABLE">
+                <TabPane layoutX="16.0" layoutY="50.0" prefHeight="441.0" prefWidth="1169.0"
+                         tabClosingPolicy="UNAVAILABLE">
                     <tabs>
                         <Tab text="Timeline">
                             <content>
@@ -27,12 +29,15 @@
                                         <ScrollPane fitToHeight="true" prefHeight="400.0" prefWidth="1169.0">
                                             <content>
 
-                                                <LineChart fx:id="timelineChart" alternativeColumnFillVisible="true" horizontalGridLinesVisible="false" legendVisible="false" prefHeight="399.0" prefWidth="200.0" title="Timeline">
+                                                <LineChart fx:ID="timelineChart" alternativeColumnFillVisible="true"
+                                                           horizontalGridLinesVisible="false" legendVisible="false"
+                                                           prefHeight="399.0" prefWidth="200.0" title="Timeline">
                                                     <xAxis>
-                                                        <CategoryAxis side="BOTTOM" />
+                                                        <CategoryAxis side="BOTTOM"/>
                                                     </xAxis>
                                                     <yAxis>
-                                                        <NumberAxis autoRanging="false" opacity="0" side="LEFT" upperBound="2" />
+                                                        <NumberAxis autoRanging="false" opacity="0" side="LEFT"
+                                                                    upperBound="2"/>
                                                     </yAxis>
                                                 </LineChart>
                                             </content>
@@ -43,23 +48,26 @@
                         </Tab>
                         <Tab text="Chart">
                             <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0"/>
                             </content>
                         </Tab>
                     </tabs>
                 </TabPane>
-            <Button fx:id="button" layoutX="1124.0" layoutY="760.0" mnemonicParsing="false" onAction="#test" text="Button" />
-            <Label fx:id="actualChooser" layoutX="16.0" layoutY="14.0" text="Not choose" />
-            <ListView fx:id="listAll" layoutX="16.0" layoutY="491.0" prefHeight="293.0" prefWidth="473.0" />
-            <Button fx:id="searchAllButton" layoutX="499.0" layoutY="491.0" mnemonicParsing="false" onAction="#searchAll" prefHeight="26.0" prefWidth="147.0" text="Search all" />
-            <Button fx:id="searchChoosePatientButton" layoutX="499.0" layoutY="526.0" mnemonicParsing="false" onAction="#searchPatient" prefHeight="26.0" prefWidth="147.0" text="Choose patient" />
+                <Button fx:ID="button" layoutX="1124.0" layoutY="760.0" mnemonicParsing="false" onAction="#test"
+                        text="Button"/>
+                <Label fx:ID="actualChooser" layoutX="16.0" layoutY="14.0" text="Not choose"/>
+                <ListView fx:ID="listAll" layoutX="16.0" layoutY="491.0" prefHeight="293.0" prefWidth="473.0"/>
+                <Button fx:ID="searchAllButton" layoutX="499.0" layoutY="491.0" mnemonicParsing="false"
+                        onAction="#searchAll" prefHeight="26.0" prefWidth="147.0" text="Search all"/>
+                <Button fx:ID="searchChoosePatientButton" layoutX="499.0" layoutY="526.0" mnemonicParsing="false"
+                        onAction="#searchPatient" prefHeight="26.0" prefWidth="147.0" text="Choose patient"/>
             </children>
         </AnchorPane>
     </children>
     <columnConstraints>
-        <ColumnConstraints />
+        <ColumnConstraints/>
     </columnConstraints>
     <rowConstraints>
-        <RowConstraints />
+        <RowConstraints/>
     </rowConstraints>
 </GridPane>
