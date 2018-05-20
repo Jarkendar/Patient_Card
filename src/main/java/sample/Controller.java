@@ -2,12 +2,17 @@ package sample;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
@@ -32,6 +37,14 @@ import java.util.Set;
 
 
 public class Controller implements Observer {
+
+    public Label actualChooser;
+    public ListView listAll;
+    public Button searchAllButton;
+    public Button searchChoosePatientButton;
+
+    private DataProvider dataProvider = new DataProvider();
+
 
     private double circleSize = 100.0;
     public LineChart timelineChart;
@@ -79,9 +92,10 @@ public class Controller implements Observer {
     private void test() {
         System.out.println("click");
 
-        Connector connector = new Connector(Connector.GET_ALL_PATTIENT);
-        connector.addObserver(this);
-        new Thread(connector).start();
+        DataProvider dataProvider = new DataProvider();
+        dataProvider.setOrder(DataProvider.GET_ALL_PATIENT);
+        dataProvider.addObserver(this);
+        new Thread(dataProvider).start();
 
 
         Logger logger = LoggerFactory.getLogger(Controller.class);
@@ -158,7 +172,28 @@ public class Controller implements Observer {
     }
 
     @Override
-    public void update(Observable o, Object arg) {
+    public void update(Observable observable, Object arg) {
+        DataProvider receiver = (DataProvider) observable;
+        switch (receiver.getOrder()){
+            case DataProvider.GET_ALL_PATIENT:{
+                Platform.runLater(() -> {
+                    listAll.setItems(FXCollections.observableArrayList(receiver.getResultPatients()));
+                });
+            }
+        }
+    }
 
+    public void searchAll(ActionEvent actionEvent) {
+        dataProvider.setOrder(DataProvider.GET_ALL_PATIENT);
+        dataProvider.addObserver(this);
+        new Thread(dataProvider).start();
+    }
+
+    public void searchPatient(ActionEvent actionEvent) {
+        if (listAll.getSelectionModel().getSelectedItems() != null) {
+            dataProvider.setOrder(DataProvider.GET_PATIENT);
+            dataProvider.setPatientID(dataProvider.getResultPatients().get(listAll.getSelectionModel().getSelectedIndex()).getID());
+            new Thread(dataProvider).start();
+        }
     }
 }

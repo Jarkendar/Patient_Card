@@ -2,54 +2,67 @@ package sample;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.rest.gclient.StringClientParam;
 import org.hl7.fhir.dstu3.model.Bundle;
+import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Patient;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
-public class Connector extends Observable implements Runnable {
+public class Connector {
 
     private static final String SERVER_ADDRESS = "http://hapi.fhir.org/baseDstu3";
-    public static final String GET_ALL_PATTIENT = "GET_ALL_PATTIENT";
 
-    private LinkedList<Observer> observers = new LinkedList<>();
-
-    private String option = "";
+    private FhirContext fhirContext;
+    private IGenericClient client;
     private List<Bundle.BundleEntryComponent> result = new LinkedList<>();
 
-    public Connector(String option) {
-        this.option = option;
+    public Connector() {
+        fhirContext = FhirContext.forDstu3();
+        client = fhirContext.newRestfulGenericClient(SERVER_ADDRESS);
     }
 
-    @Override
-    public void run() {
-        FhirContext fhirContext = FhirContext.forDstu3();
-        IGenericClient client = fhirContext.newRestfulGenericClient(SERVER_ADDRESS);
-
-        switch (option) {
-            case GET_ALL_PATTIENT: {
-                result = getAllAvailablePatient(client);
-                break;
-            }
-        }
-        notifyObservers();
-    }
-
-    private List<Bundle.BundleEntryComponent> getAllAvailablePatient(IGenericClient client) {
+    public List<Bundle.BundleEntryComponent> getAllAvailablePatient() {
         Bundle results = client
                 .search()
                 .forResource(Patient.class)
+                .where(new StringClientParam("given").matches().value("Huong"))
                 .returnBundle(Bundle.class)
+                .limitTo(500)
                 .execute();
-        System.out.println(results.getTotal());
-        List<Bundle.BundleEntryComponent> entries = results.getEntry();
-        System.out.println(entries.size());
-        for (Bundle.BundleEntryComponent entry : entries) {
-            displayEntry(entry);
+        List<Bundle.BundleEntryComponent> entries = new LinkedList<>();
+        entries.addAll(results.getEntry());
+        while (results.getLink(Bundle.LINK_NEXT) != null) {
+            // load next page
+            results = client.loadPage().next(results).execute();
+            entries.addAll(results.getEntry());
         }
+        return entries;
+    }
+
+    public List<Bundle.BundleEntryComponent> getEverythingFromPatient(String patientID) {
+        Parameters parameters = client
+                .operation()
+                .onInstance(new IdType("Patient", patientID))
+                .named("$everything")
+                .withNoParameters(Parameters.class)
+                .useHttpGet()
+                .execute();
+        List<Bundle.BundleEntryComponent> entries = new LinkedList<>();
+
+        List<Parameters.ParametersParameterComponent> parameterComponents = parameters.getParameter();
+        for (Parameters.ParametersParameterComponent parameterComponent : parameterComponents){
+            Bundle bundle = (Bundle) parameterComponent.getResource();
+            entries.addAll(bundle.getEntry());
+            while (bundle.getLink(Bundle.LINK_NEXT) != null) {
+                // load next page
+                bundle = client.loadPage().next(bundle).execute();
+                entries.addAll(bundle.getEntry());
+            }
+        }
+
         return entries;
     }
 
@@ -63,29 +76,4 @@ public class Connector extends Observable implements Runnable {
         return result;
     }
 
-    @Override
-    public synchronized void addObserver(Observer observer) {
-        super.addObserver(observer);
-        observers.addLast(observer);
-    }
-
-    @Override
-    public synchronized void deleteObserver(Observer observer) {
-        super.deleteObserver(observer);
-        observers.remove(observer);
-    }
-
-    @Override
-    public void notifyObservers() {
-        super.notifyObservers();
-        for (Observer observer : observers) {
-            observer.update(this, null);
-        }
-    }
-
-    @Override
-    public synchronized void deleteObservers() {
-        super.deleteObservers();
-        observers.clear();
-    }
 }
