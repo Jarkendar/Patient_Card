@@ -42,6 +42,7 @@ public class Controller implements Observer {
     public ListView listAll;
     public Button searchAllButton;
     public Button searchChoosePatientButton;
+    public ListView medicationList;
 
     private DataProvider dataProvider = new DataProvider();
 
@@ -180,10 +181,20 @@ public class Controller implements Observer {
                     listAll.setItems(FXCollections.observableArrayList(receiver.getResultPatients()));
                 });
             }
+            case DataProvider.GET_PATIENT:{
+                Platform.runLater(() -> {
+                    medicationList.setItems(FXCollections.observableArrayList(receiver.getMedicationList()));
+                });
+            }
         }
     }
 
     public void searchAll(ActionEvent actionEvent) {
+        listAll.getItems().clear();
+        medicationList.getItems().clear();
+        dataProvider.clearPatientList();
+        dataProvider.clearMedicalList();
+        dataProvider.clearMedicationList();
         dataProvider.setOrder(DataProvider.GET_ALL_PATIENT);
         dataProvider.addObserver(this);
         new Thread(dataProvider).start();
@@ -191,6 +202,9 @@ public class Controller implements Observer {
 
     public void searchPatient(ActionEvent actionEvent) {
         if (listAll.getSelectionModel().getSelectedItems() != null) {
+            medicationList.getItems().clear();
+            dataProvider.clearMedicalList();
+            dataProvider.clearMedicationList();
             dataProvider.setOrder(DataProvider.GET_PATIENT);
             dataProvider.setPatientID(dataProvider.getResultPatients().get(listAll.getSelectionModel().getSelectedIndex()).getID());
             new Thread(dataProvider).start();

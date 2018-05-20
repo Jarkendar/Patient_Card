@@ -17,8 +17,8 @@ public class DataProvider extends Observable implements Runnable {
     private Connector connector;
     private String order = "";
     private String patientID = "";
-    private LinkedList<PatientData> resultPatients;
-    private LinkedList<MedicalData> resultMedicals;
+    private LinkedList<PatientData> resultPatients = new LinkedList<>();
+    private LinkedList<MedicalData> resultMedicals = new LinkedList<>();
     private LinkedList<MedicationData> medicationList = new LinkedList<>();
     private String filterCondition = "";
 
@@ -99,16 +99,26 @@ public class DataProvider extends Observable implements Runnable {
                     e.printStackTrace();
                 }
                 medicals.addLast(new MedicalData("Observation", name, entryComponent.getFullUrl().split("/")[entryComponent.getFullUrl().split("/").length - 1], startDate, null, measure, entryComponent));
-                System.out.println(medicals.getLast().getHint());
             } else if (entryComponent.getResource() instanceof Medication) {
                 Medication medication = (Medication) entryComponent.getResource();
                 medicationList.addLast(new MedicationData(medication.getCode().getCodingFirstRep().getDisplay(), medication.getCode().getCodingFirstRep().getCode(), entryComponent.getFullUrl().split("/")[entryComponent.getFullUrl().split("/").length - 1], entryComponent));
-                System.out.println(medicationList.getLast().getHint());
             } else {
                 System.out.println("**************************" + entryComponent.getResource()+" "+entryComponent.getFullUrl());
             }
         }
         return medicals;
+    }
+
+    public void clearPatientList(){
+        resultPatients.clear();
+    }
+
+    public void clearMedicalList(){
+        resultMedicals.clear();
+    }
+
+    public void clearMedicationList(){
+        medicationList.clear();
     }
 
     public LinkedList<PatientData> getResultPatients() {
@@ -125,6 +135,14 @@ public class DataProvider extends Observable implements Runnable {
 
     public void setPatientID(String patientID) {
         this.patientID = patientID;
+    }
+
+    public LinkedList<MedicationData> getMedicationList() {
+        return medicationList;
+    }
+
+    public LinkedList<MedicalData> getResultMedicals() {
+        return resultMedicals;
     }
 
     public void setFilterCondition(String filterCondition) {
