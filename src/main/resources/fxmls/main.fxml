@@ -27,7 +27,7 @@
                                         <ScrollPane fitToHeight="true" prefHeight="400.0" prefWidth="1169.0">
                                             <content>
 
-                                                <LineChart fx:id="timelineChart" alternativeColumnFillVisible="true" horizontalGridLinesVisible="false" legendVisible="false" prefHeight="399.0" prefWidth="200.0" title="Timeline">
+                                                <LineChart fx:id="timelineChart" alternativeColumnFillVisible="true" horizontalGridLinesVisible="false" legendVisible="false" prefHeight="399.0" prefWidth="150.0" title="Timeline">
                                                     <xAxis>
                                                         <CategoryAxis side="BOTTOM" />
                                                     </xAxis>

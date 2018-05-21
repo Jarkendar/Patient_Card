@@ -26,11 +26,13 @@ import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sample.datas_model.MedicalData;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
+import java.util.LinkedList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Set;
@@ -180,12 +182,70 @@ public class Controller implements Observer {
                 Platform.runLater(() -> {
                     listAll.setItems(FXCollections.observableArrayList(receiver.getResultPatients()));
                 });
+                break;
             }
             case DataProvider.GET_PATIENT:{
                 Platform.runLater(() -> {
                     medicationList.setItems(FXCollections.observableArrayList(receiver.getMedicationList()));
+                    buildTimeline(receiver.getResultMedicals());
                 });
+                break;
             }
+        }
+    }
+
+    private void buildTimeline(LinkedList<MedicalData> medicalData){
+        Platform.runLater(() -> {
+            System.out.println(timelineChart.getPrefWidth()+"--");
+            setDefaultTimeline();
+            System.out.println(medicalData.size());
+            System.out.println(timelineChart.getPrefWidth()*medicalData.size());
+            timelineChart.setPrefWidth(timelineChart.getPrefWidth()*medicalData.size());
+            createSeriesFromMedicalData(medicalData);
+        });
+    }
+
+    private void createSeriesFromMedicalData(LinkedList<MedicalData> medicalData){
+        XYChart.Series series = new XYChart.Series();
+        series.setName("Patient data");
+
+        ObservableList<XYChart.Data> dataObservableList = FXCollections.observableArrayList();
+
+        for (MedicalData medical : medicalData) {
+            XYChart.Data<String, Number> data = new XYChart.Data<>(medical.getStartDate().toString(), 1, medical);
+            Region region = new Region();
+            region.setShape(new Circle(circleSize));
+            region.setPrefHeight(circleSize);
+            region.setPrefWidth(circleSize);
+            try {
+                region.setBackground(new Background(new BackgroundImage(new Image(new FileInputStream(new File(getClass().getResource("/images/baseline_accessibility_black_18dp.png").toURI()))), null, null, null, null)));
+            } catch (FileNotFoundException | URISyntaxException e) {
+                e.printStackTrace();
+            }
+            data.setNode(region);
+            dataObservableList.add(data);
+        }
+        series.getData().addAll(dataObservableList);
+        timelineChart.getData().addAll(series);
+        setListenersToNodeChart(timelineChart.lookupAll(".default-color0.chart-line-symbol.series0."), dataObservableList);
+
+    }
+
+    private void setListenersToNodeChart(Set<Node> nodes, ObservableList<XYChart.Data> dataObservableList){
+        nodes.forEach((element) -> element.setOnMouseEntered((MouseEvent event) -> {
+            for (int i = 0; i< dataObservableList.size(); i++){
+                if (event.getSource().toString().contains("data"+i)){
+                    Tooltip tooltip = new Tooltip(((MedicalData)dataObservableList.get(i).getExtraValue()).getHint());
+                    Tooltip.install(element, tooltip);
+                }
+            }
+        }));
+    }
+
+    private void setDefaultTimeline(){
+        timelineChart.setPrefWidth(150.0);
+        for (int i =0; i<timelineChart.getData().size(); i++){
+            timelineChart.getData().remove(i);
         }
     }
 

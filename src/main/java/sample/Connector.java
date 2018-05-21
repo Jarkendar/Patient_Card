@@ -30,7 +30,6 @@ public class Connector {
                 .forResource(Patient.class)
                 .where(new StringClientParam("given").matches().value("Huong"))
                 .returnBundle(Bundle.class)
-                .limitTo(500)
                 .execute();
         List<Bundle.BundleEntryComponent> entries = new LinkedList<>();
         entries.addAll(results.getEntry());
