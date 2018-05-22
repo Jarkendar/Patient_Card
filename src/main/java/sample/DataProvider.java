@@ -13,10 +13,11 @@ public class DataProvider extends Observable implements Runnable {
     private LinkedList<Observer> observers = new LinkedList<>();
     public static final String GET_ALL_PATIENT = "GET_ALL_PATIENT";
     public static final String GET_PATIENT = "GET_PATIENT";
+    public static final String GET_PATIENT_BY_FAMILY_NAME = "GET_PATIENT_BY_FAMILY_NAME";
 
     private Connector connector;
     private String order = "";
-    private String patientID = "";
+    private String patientInfo = "";
     private LinkedList<PatientData> resultPatients = new LinkedList<>();
     private LinkedList<MedicalData> resultMedicals = new LinkedList<>();
     private LinkedList<MedicationData> medicationList = new LinkedList<>();
@@ -36,8 +37,13 @@ public class DataProvider extends Observable implements Runnable {
                 break;
             }
             case GET_PATIENT: {
-                List<Bundle.BundleEntryComponent> entries = connector.getEverythingFromPatient(patientID);
+                List<Bundle.BundleEntryComponent> entries = connector.getEverythingFromPatient(patientInfo);
                 resultMedicals = getMedicalFromEntries(entries);
+                break;
+            }
+            case GET_PATIENT_BY_FAMILY_NAME:{
+                List<Bundle.BundleEntryComponent> entries = connector.getPatientByFamilyName(patientInfo);
+                resultPatients = getPatientFromEntries(entries);
                 break;
             }
         }
@@ -133,8 +139,8 @@ public class DataProvider extends Observable implements Runnable {
         return order;
     }
 
-    public void setPatientID(String patientID) {
-        this.patientID = patientID;
+    public void setPatientInfo(String patientInfo) {
+        this.patientInfo = patientInfo;
     }
 
     public LinkedList<MedicationData> getMedicationList() {

@@ -2,6 +2,7 @@ package sample.datas_model;
 
 import org.hl7.fhir.dstu3.model.Bundle;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class MedicalData {
@@ -35,6 +36,15 @@ public class MedicalData {
             }
         }
         return message +  getMeasure();
+    }
+
+    public String getPrettyDate(){
+        if (startDate != null) {
+            SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm dd-MMM-yyyy");
+            return simpleDateFormat.format(startDate);
+        }else {
+            return null;
+        }
     }
 
     public String toString(){

@@ -3,10 +3,7 @@ package sample;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
-import org.hl7.fhir.dstu3.model.Bundle;
-import org.hl7.fhir.dstu3.model.IdType;
-import org.hl7.fhir.dstu3.model.Parameters;
-import org.hl7.fhir.dstu3.model.Patient;
+import org.hl7.fhir.dstu3.model.*;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -21,6 +18,7 @@ public class Connector {
 
     public Connector() {
         fhirContext = FhirContext.forDstu3();
+        fhirContext.getRestfulClientFactory().setSocketTimeout(60*1000);
         client = fhirContext.newRestfulGenericClient(SERVER_ADDRESS);
     }
 
@@ -28,15 +26,39 @@ public class Connector {
         Bundle results = client
                 .search()
                 .forResource(Patient.class)
+                //.where( Patient.FAMILY.matches().value("Smith"))
                 .where(new StringClientParam("given").matches().value("Huong"))
                 .returnBundle(Bundle.class)
+                .count(1000)
                 .execute();
+        System.out.println(results.getTotal());
         List<Bundle.BundleEntryComponent> entries = new LinkedList<>();
         entries.addAll(results.getEntry());
         while (results.getLink(Bundle.LINK_NEXT) != null) {
             // load next page
             results = client.loadPage().next(results).execute();
             entries.addAll(results.getEntry());
+            System.out.println(entries.size());
+        }
+        return entries;
+    }
+
+    public List<Bundle.BundleEntryComponent> getPatientByFamilyName(String familyName) {
+        Bundle results = client
+                .search()
+                .forResource(Patient.class)
+                .where( Patient.FAMILY.matches().value(familyName))
+                .returnBundle(Bundle.class)
+                .count(1000)
+                .execute();
+        System.out.println(results.getTotal());
+        List<Bundle.BundleEntryComponent> entries = new LinkedList<>();
+        entries.addAll(results.getEntry());
+        while (results.getLink(Bundle.LINK_NEXT) != null) {
+            // load next page
+            results = client.loadPage().next(results).execute();
+            entries.addAll(results.getEntry());
+            System.out.println(entries.size());
         }
         return entries;
     }
