@@ -20,10 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.net.URISyntaxException;
-import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Set;
+import java.util.*;
 
 
 public class Controller implements Observer {
@@ -83,6 +80,8 @@ public class Controller implements Observer {
     private void createSeriesFromMedicalData(LinkedList<MedicalData> medicalData){
         XYChart.Series series = new XYChart.Series();
         series.setName("Patient data");
+
+        medicalData.sort(Comparator.comparing(MedicalData::getStartDate));
 
         ObservableList<XYChart.Data<String, Number>> dataObservableList = FXCollections.observableArrayList();
         System.out.println("medical data size = "+medicalData.size());
