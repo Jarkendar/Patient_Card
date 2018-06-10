@@ -16,11 +16,11 @@ public class MedicationData {
     }
 
     public String getHint() {
-        return "Name: " + getMedicationName() + "\nCode: " + medicationCode + "\nID: " + getID();
+        return "Name: " + getMedicationName() + "\nCode: " + getMedicationCode() + "\nID: " + getID();
     }
 
     public String toString() {
-        return "Name: " + getMedicationName() + ", Code: " + medicationCode;
+        return "Name: " + getMedicationName() + ", Code: " + getMedicationCode();
     }
 
     public String getMedicationName() {

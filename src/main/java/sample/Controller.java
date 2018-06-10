@@ -43,21 +43,21 @@ public class Controller implements Observer {
     @Override
     public void update(Observable observable, Object arg) {
         DataProvider receiver = (DataProvider) observable;
-        switch (receiver.getOrder()){
-            case DataProvider.GET_ALL_PATIENT:{
+        switch (receiver.getOrder()) {
+            case DataProvider.GET_ALL_PATIENT: {
                 Platform.runLater(() -> {
                     listAll.setItems(FXCollections.observableArrayList(receiver.getResultPatients()));
                 });
                 break;
             }
-            case DataProvider.GET_PATIENT:{
+            case DataProvider.GET_PATIENT: {
                 Platform.runLater(() -> {
                     medicationList.setItems(FXCollections.observableArrayList(receiver.getMedicationList()));
                     buildTimeline(receiver.getResultMedicals());
                 });
                 break;
             }
-            case DataProvider.GET_PATIENT_BY_FAMILY_NAME:{
+            case DataProvider.GET_PATIENT_BY_FAMILY_NAME: {
                 Platform.runLater(() -> {
                     listAll.setItems(FXCollections.observableArrayList(receiver.getResultPatients()));
                 });
@@ -66,39 +66,35 @@ public class Controller implements Observer {
         }
     }
 
-    private void buildTimeline(LinkedList<MedicalData> medicalData){
+    private void buildTimeline(LinkedList<MedicalData> medicalData) {
         Platform.runLater(() -> {
-            System.out.println(timelineChart.getPrefWidth()+"--");
             setDefaultTimeline();
-            System.out.println(medicalData.size());
-            System.out.println(timelineChart.getPrefWidth()*medicalData.size());
             createSeriesFromMedicalData(medicalData);
-            timelineChart.setPrefWidth(timelineChart.getPrefWidth()*medicalData.size());
+            timelineChart.setPrefWidth(timelineChart.getPrefWidth() * medicalData.size());
         });
     }
 
-    private void createSeriesFromMedicalData(LinkedList<MedicalData> medicalData){
+    private void createSeriesFromMedicalData(LinkedList<MedicalData> medicalData) {
         XYChart.Series series = new XYChart.Series();
         series.setName("Patient data");
 
         medicalData.sort(Comparator.comparing(MedicalData::getStartDate));
 
         ObservableList<XYChart.Data<String, Number>> dataObservableList = FXCollections.observableArrayList();
-        System.out.println("medical data size = "+medicalData.size());
         int i = 1;
         for (MedicalData medical : medicalData) {
-            XYChart.Data<String, Number> data = new XYChart.Data<>((i++)+") "+medical.getPrettyDate(), 1, medical);
+            XYChart.Data<String, Number> data = new XYChart.Data<>((i++) + ") " + medical.getPrettyDate(), 1, medical);
             Region region = new Region();
             region.setShape(new Circle(circleSize));
             region.setPrefHeight(circleSize);
             region.setPrefWidth(circleSize);
             try {
-                switch (medical.getTypeName()){
-                    case "Medication Statement":{
+                switch (medical.getTypeName()) {
+                    case "Medication Statement": {
                         region.setBackground(new Background(new BackgroundImage(new Image(new FileInputStream(new File(getClass().getResource("/images/syringe.png").toURI()))), null, null, null, null)));
                         break;
                     }
-                    case "Observation":{
+                    case "Observation": {
                         region.setBackground(new Background(new BackgroundImage(new Image(new FileInputStream(new File(getClass().getResource("/images/lupe.png").toURI()))), null, null, null, null)));
                         break;
                     }
@@ -109,28 +105,26 @@ public class Controller implements Observer {
             data.setNode(region);
             dataObservableList.add(data);
         }
-        System.out.println("observable = "+dataObservableList.size());
         series.getData().addAll(dataObservableList);
-        System.out.println(series.getData().size());
         timelineChart.getData().addAll(series);
         setListenersToNodeChart(timelineChart.lookupAll(".default-color0.chart-line-symbol.series0."), dataObservableList);
 
     }
 
-    private void setListenersToNodeChart(Set<Node> nodes, ObservableList<XYChart.Data<String, Number>> dataObservableList){
+    private void setListenersToNodeChart(Set<Node> nodes, ObservableList<XYChart.Data<String, Number>> dataObservableList) {
         nodes.forEach((element) -> element.setOnMouseEntered((MouseEvent event) -> {
-            for (int i = 0; i< dataObservableList.size(); i++){
-                if (event.getSource().toString().contains("data"+i)){
-                    Tooltip tooltip = new Tooltip(((MedicalData)dataObservableList.get(i).getExtraValue()).getHint());
+            for (int i = 0; i < dataObservableList.size(); i++) {
+                if (event.getSource().toString().contains("data" + i)) {
+                    Tooltip tooltip = new Tooltip(((MedicalData) dataObservableList.get(i).getExtraValue()).getHint());
                     Tooltip.install(element, tooltip);
                 }
             }
         }));
     }
 
-    private void setDefaultTimeline(){
+    private void setDefaultTimeline() {
         timelineChart.setPrefWidth(250.0);
-        for (int i =0; i<timelineChart.getData().size(); i++){
+        for (int i = 0; i < timelineChart.getData().size(); i++) {
             timelineChart.getData().remove(i);
         }
     }
@@ -161,7 +155,7 @@ public class Controller implements Observer {
     }
 
     public void searchPatientByFamilyName(ActionEvent actionEvent) {
-        if (!familyNameTextField.getText().equals("")){
+        if (!familyNameTextField.getText().equals("")) {
             dataProvider.deleteObservers();
             listAll.getItems().clear();
             medicationList.getItems().clear();

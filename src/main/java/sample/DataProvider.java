@@ -41,7 +41,7 @@ public class DataProvider extends Observable implements Runnable {
                 resultMedicals = getMedicalFromEntries(entries);
                 break;
             }
-            case GET_PATIENT_BY_FAMILY_NAME:{
+            case GET_PATIENT_BY_FAMILY_NAME: {
                 List<Bundle.BundleEntryComponent> entries = connector.getPatientByFamilyName(patientInfo);
                 resultPatients = getPatientFromEntries(entries);
                 break;
@@ -91,15 +91,15 @@ public class DataProvider extends Observable implements Runnable {
                     startDate = observation.getIssued();
                     if (observation.hasValueQuantity()) {
                         measure = observation.getValueQuantity().getValue().toString() + observation.getValueQuantity().getUnit();
-                    } else if (observation.hasComponent()){
+                    } else if (observation.hasComponent()) {
                         LinkedList<String> names = new LinkedList<>();
                         LinkedList<String> values = new LinkedList<>();
-                        for (Observation.ObservationComponentComponent component : observation.getComponent()){
+                        for (Observation.ObservationComponentComponent component : observation.getComponent()) {
                             names.addLast(component.getCode().getText());
-                            values.addLast(component.getValueQuantity().getValue().toString()+component.getValueQuantity().getUnit());
+                            values.addLast(component.getValueQuantity().getValue().toString() + component.getValueQuantity().getUnit());
                         }
                         name = String.join("/", names);
-                        measure = String.join("/",values);
+                        measure = String.join("/", values);
                     }
                 } catch (FHIRException e) {
                     e.printStackTrace();
@@ -109,21 +109,21 @@ public class DataProvider extends Observable implements Runnable {
                 Medication medication = (Medication) entryComponent.getResource();
                 medicationList.addLast(new MedicationData(medication.getCode().getCodingFirstRep().getDisplay(), medication.getCode().getCodingFirstRep().getCode(), entryComponent.getFullUrl().split("/")[entryComponent.getFullUrl().split("/").length - 1], entryComponent));
             } else {
-                System.out.println("**************************" + entryComponent.getResource()+" "+entryComponent.getFullUrl());
+                System.out.println("**************************" + entryComponent.getResource() + " " + entryComponent.getFullUrl());
             }
         }
         return medicals;
     }
 
-    public void clearPatientList(){
+    public void clearPatientList() {
         resultPatients.clear();
     }
 
-    public void clearMedicalList(){
+    public void clearMedicalList() {
         resultMedicals.clear();
     }
 
-    public void clearMedicationList(){
+    public void clearMedicationList() {
         medicationList.clear();
     }
 

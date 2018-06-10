@@ -5,7 +5,7 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class PatientData{
+public class PatientData {
     private String ID;
     private String name;
     private Date birthDate;
@@ -40,21 +40,21 @@ public class PatientData{
         return source;
     }
 
-    private String getPrettyDate(){
-        if (birthDate != null) {
+    private String getPrettyDate() {
+        if (getBirthDate() != null) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm dd-MMM-yyyy");
-            return simpleDateFormat.format(birthDate);
-        }else {
+            return simpleDateFormat.format(getBirthDate());
+        } else {
             return null;
         }
     }
 
-    public String getHint(){
-        return "Patient: "+getID()+"\nName: "+getName()+"\nGender: "+getGender()+"BirthDate: "+getPrettyDate();
+    public String getHint() {
+        return "Patient: " + getID() + "\nName: " + getName() + "\nGender: " + getGender() + "BirthDate: " + getPrettyDate();
     }
 
     @Override
     public String toString() {
-        return "Patient: "+getID()+", "+getName()+", "+getGender()+", "+getPrettyDate();
+        return "Patient: " + getID() + ", " + getName() + ", " + getGender() + ", " + getPrettyDate();
     }
 }
