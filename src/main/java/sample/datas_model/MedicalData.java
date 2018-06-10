@@ -24,41 +24,41 @@ public class MedicalData {
         this.source = source;
     }
 
-    public String getHint(){
-        String message = "Type: "+getTypeName()+"\nName: "+getName()+"\nID: "+getID();
-        switch (typeName){
-            case "Medication Statement":{
-                message += "\nStart date: "+getStartDate()+"\nEnd date: "+getEndDate()+"\nDose: ";
+    public String getHint() {
+        String message = "Type: " + getTypeName() + "\nName: " + getName() + "\nID: " + getID();
+        switch (getTypeName()) {
+            case "Medication Statement": {
+                message += "\nStart date: " + getStartDate() + "\nEnd date: " + getEndDate() + "\nDose: ";
                 break;
             }
-            case "Observation":{
-                message += "\nIssued date: "+getStartDate()+"\nMeasure: ";
+            case "Observation": {
+                message += "\nIssued date: " + getStartDate() + "\nMeasure: ";
             }
         }
-        return message +  getMeasure();
+        return message + getMeasure();
     }
 
-    public String getPrettyDate(){
-        if (startDate != null) {
+    public String getPrettyDate() {
+        if (getStartDate() != null) {
             SimpleDateFormat simpleDateFormat = new SimpleDateFormat("hh:mm dd-MMM-yyyy");
-            return simpleDateFormat.format(startDate);
-        }else {
+            return simpleDateFormat.format(getStartDate());
+        } else {
             return null;
         }
     }
 
-    public String toString(){
-        String message =  "Type: "+getTypeName()+", Name: "+getName()+", ID: "+getID();
-        switch (typeName){
-            case "Medication Statement":{
-                message += ", Start date: "+getStartDate()+", End date: "+", Dose: ";
+    public String toString() {
+        String message = "Type: " + getTypeName() + ", Name: " + getName() + ", ID: " + getID();
+        switch (getTypeName()) {
+            case "Medication Statement": {
+                message += ", Start date: " + getStartDate() + ", End date: " + ", Dose: ";
                 break;
             }
-            case "Observation":{
-                message += ", Issued date: "+getStartDate()+", Measure: ";
+            case "Observation": {
+                message += ", Issued date: " + getStartDate() + ", Measure: ";
             }
         }
-        return message +  getMeasure();
+        return message + getMeasure();
     }
 
     public String getTypeName() {
